@@ -1,23 +1,21 @@
 package dev.ajkipp.weather.api;
 
-import dev.ajkipp.weather.api.model.Daily;
-import dev.ajkipp.weather.api.model.GetForecastResponseBody;
+import dev.ajkipp.weather.model.GetForecastResponseBody;
+import dev.ajkipp.weather.service.WeatherService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
+@RequiredArgsConstructor
 public class WeatherController {
+
+    private final WeatherService weatherService;
+
     @GetMapping("forecast")
     public GetForecastResponseBody getForecast() {
         GetForecastResponseBody body = new GetForecastResponseBody();
-        Daily daily = Daily.builder()
-                .dayName("Monday")
-                .tempHighCelsius(27.2)
-                .forecastBlurp("Partly Sunny")
-                .build();
-        body.setDaily(List.of(daily));
+        body.setDaily(weatherService.getForecast());
         return body;
     }
 }

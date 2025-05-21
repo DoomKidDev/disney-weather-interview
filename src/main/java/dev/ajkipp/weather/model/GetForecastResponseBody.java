@@ -1,4 +1,4 @@
-package dev.ajkipp.weather.api.model;
+package dev.ajkipp.weather.model;
 
 import lombok.Data;
 

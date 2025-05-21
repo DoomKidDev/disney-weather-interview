@@ -31,8 +31,7 @@ class TestWeatherController {
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.daily[0].day_name").value("Monday"))
-                .andExpect(jsonPath("$.daily[0].temp_high_celsius").value("Monday"))
-                .andExpect(jsonPath("$.daily[0].forecast_blurp").value("Monday"));
-
+                .andExpect(jsonPath("$.daily[0].temp_high_celsius").value(27.2))
+                .andExpect(jsonPath("$.daily[0].forecast_blurp").value("Partly Sunny"));
     }
 }

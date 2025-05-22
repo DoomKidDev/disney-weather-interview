@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static util.TestUtils.readJsonData;
 
 class WeatherClientTest {
 
@@ -63,13 +64,5 @@ class WeatherClientTest {
                 .verifyComplete();
     }
 
-    @NotNull
-    private static String readJsonData() {
-        try {
-            return new ClassPathResource("data/forecast-api-response.json").getContentAsString(Charset.defaultCharset());
-        } catch (IOException e) {
-            fail("Unable to read JSON data");
-            return null;
-        }
-    }
+
 }

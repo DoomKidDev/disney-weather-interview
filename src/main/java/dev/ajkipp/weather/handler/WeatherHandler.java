@@ -3,7 +3,6 @@ package dev.ajkipp.weather.handler;
 import dev.ajkipp.weather.model.GetForecastResponseBody;
 import dev.ajkipp.weather.service.WeatherService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;

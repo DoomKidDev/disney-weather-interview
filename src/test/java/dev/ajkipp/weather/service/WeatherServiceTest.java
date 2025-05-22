@@ -14,10 +14,11 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.time.LocalDate;
+import java.time.Month;
+import java.time.OffsetDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,11 +34,17 @@ class WeatherServiceTest {
         Mono<WeatherClientResponseBody> responseMono = Mono.just(
                 WeatherClientResponseBody.builder()
                         .properties(Properties.builder()
-                                .periods(List.of(Period.builder()
-                                        .name("Tonight")
-                                        .temperature(81)
-                                        .shortForecast("Sunny")
-                                        .build()))
+                                .periods(List.of(
+                                        Period.builder()
+                                                .temperature(78)
+                                                .shortForecast("Sunny")
+                                                .startTime(OffsetDateTime.now())
+                                                .build(),
+                                        Period.builder()
+                                                .temperature(81)
+                                                .shortForecast("Partly Cloudy")
+                                                .startTime(OffsetDateTime.now().plusHours(4))
+                                                .build()))
                                 .build())
                         .build());
 
@@ -59,17 +66,22 @@ class WeatherServiceTest {
     }
 
     @Test
+    void isStartTimeToday() {
+        Period mockPeriod = Period.builder()
+                .startTime(OffsetDateTime.now())
+                .build();
+
+        assertTrue(WeatherService.isStartTimeToday(mockPeriod));
+    }
+
+    @Test
     void getTempHighCelsius_ExpectMaxConvertedWithOneDecimal() {
         Period periodLow = Period.builder()
-                .name("This Afternoon")
                 .temperature(78)
-                .shortForecast("Sunny")
                 .build();
 
         Period periodHigh = Period.builder()
-                .name("Tonight")
                 .temperature(81)
-                .shortForecast("Partly Cloudy")
                 .build();
 
         double tempC = weatherService.getTempHighCelsius(List.of(periodLow, periodHigh));

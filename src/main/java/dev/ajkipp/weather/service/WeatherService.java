@@ -7,6 +7,7 @@ import dev.ajkipp.weather.model.WeatherClientResponseBody;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
@@ -20,18 +21,20 @@ public class WeatherService {
     private final WeatherClient weatherClient;
 
     public Mono<List<Daily>> getForecast() {
-        WeatherClientResponseBody response = getAPIResponse();
-        List<Period> periods = response.getProperties().getPeriods();
-        Daily forecast = Daily.builder()
-                .dayName(LocalDate.now().getDayOfWeek().name())
-                .tempHighCelsius(getTempHighCelsius(periods))
-                .forecastBlurp(getForecastShortDescription(periods))
-                .build();
-        return Mono.just(List.of(forecast));
+        return getAPIResponse()
+                .map(response -> response.getProperties().getPeriods())
+                .flatMapMany(Flux::fromIterable)
+                .filter(WeatherService::isStartTimeToday)
+                .collectList()
+                .map(periods ->List.of(Daily.builder()
+                            .dayName(LocalDate.now().getDayOfWeek().name())
+                            .tempHighCelsius(getTempHighCelsius(periods))
+                            .forecastBlurp(getForecastShortDescription(periods))
+                            .build()));
     }
 
-    WeatherClientResponseBody getAPIResponse() {
-        return weatherClient.getWeather().block();
+    Mono<WeatherClientResponseBody> getAPIResponse() {
+        return weatherClient.getWeather();
     }
 
     String getForecastShortDescription(List<Period> periods) {
@@ -39,6 +42,11 @@ public class WeatherService {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("No forecast periods found"))
                 .getShortForecast();
+    }
+
+    static boolean isStartTimeToday(Period period) {
+        return period.getStartTime().toLocalDate()
+                .equals(LocalDate.now(period.getStartTime().toZonedDateTime().getZone()));
     }
 
     double getTempHighCelsius(List<Period> periods) {

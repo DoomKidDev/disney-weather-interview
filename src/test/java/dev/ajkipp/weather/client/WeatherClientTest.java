@@ -5,7 +5,10 @@ import dev.ajkipp.weather.model.WeatherClientResponseBody;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -14,8 +17,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class WeatherClientTest {
 
@@ -43,7 +44,7 @@ class WeatherClientTest {
     }
 
     @Test
-    void getWeather() throws IOException {
+    void getWeather() {
         mockBackEnd.enqueue(new MockResponse()
                 .setBody(readJsonData())
                 .addHeader("Content-Type", "application/json"));
@@ -51,11 +52,14 @@ class WeatherClientTest {
         Mono<WeatherClientResponseBody> responseMono = weatherClient.getWeather();
 
         StepVerifier.create(responseMono)
-                .expectNextMatches(responseBody -> responseBody.getProperties().getPeriods().stream()
-                        .anyMatch(period ->
-                                period.getName().equals("Overnight")
-                                && period.getShortForecast().equals("Partly Cloudy")
-                                && null != period.getTemperature()))
+                .assertNext(responseBody ->
+                        assertAll(
+                                () -> assertTrue(responseBody.getProperties().getPeriods().size() > 1),
+                                () -> responseBody.getProperties().getPeriods()
+                                        .forEach(period -> assertAll(
+                                                () -> assertNotNull(period.getName()),
+                                                () -> assertNotNull(period.getTemperature()),
+                                                () -> assertNotNull(period.getShortForecast())))))
                 .verifyComplete();
     }
 

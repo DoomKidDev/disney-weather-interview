@@ -17,9 +17,10 @@ public class WeatherHandler {
     private final WeatherService weatherService;
 
     public Mono<ServerResponse> getForecast(ServerRequest request) {
+        Mono<GetForecastResponseBody> mapped = weatherService.getForecast()
+                .map(daily -> new GetForecastResponseBody().setDaily(daily));
+
         return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(
-                        new GetForecastResponseBody()
-                                .setDaily(weatherService.getForecast())));
+                .body(mapped, GetForecastResponseBody.class);
     }
 }

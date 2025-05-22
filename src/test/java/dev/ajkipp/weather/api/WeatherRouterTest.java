@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -25,14 +26,14 @@ class WeatherRouterTest {
 
     @Test
     void getForecast() {
-        List<Daily> dailies = List.of(Daily.builder()
+        Daily mockDaily = Daily.builder()
                 .dayName("Monday")
                 .tempHighCelsius(27.2)
                 .forecastBlurp("Sunny")
-                .build());
+                .build();
 
         Mockito.when(weatherService.getForecast())
-                .thenReturn(dailies);
+                .thenReturn(Mono.just(List.of(mockDaily)));
 
         webTestClient
                 .get()

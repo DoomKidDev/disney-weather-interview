@@ -7,6 +7,7 @@ import dev.ajkipp.weather.model.WeatherClientResponseBody;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,7 +19,7 @@ public class WeatherService {
 
     private final WeatherClient weatherClient;
 
-    public List<Daily> getForecast() {
+    public Mono<List<Daily>> getForecast() {
         WeatherClientResponseBody response = getAPIResponse();
         List<Period> periods = response.getProperties().getPeriods();
         Daily forecast = Daily.builder()
@@ -26,7 +27,11 @@ public class WeatherService {
                 .tempHighCelsius(getTempHighCelsius(periods))
                 .forecastBlurp(getForecastShortDescription(periods))
                 .build();
-        return List.of(forecast);
+        return Mono.just(List.of(forecast));
+    }
+
+    WeatherClientResponseBody getAPIResponse() {
+        return weatherClient.getWeather().block();
     }
 
     String getForecastShortDescription(List<Period> periods) {
@@ -41,14 +46,15 @@ public class WeatherService {
                 .map(Period::getTemperature)
                 .reduce(Math::max)
                 .map(WeatherService::convertToCelsius)
+                .map(WeatherService::truncateToOneDecimal)
                 .orElseThrow(() -> new RuntimeException("No forecast temps found"));
+    }
+
+    static double truncateToOneDecimal(double temperature) {
+        return Math.round(temperature * 10) / 10.0;
     }
 
     static double convertToCelsius(double tempFahrenheit) {
         return (tempFahrenheit - 32) * 5 / 9;
-    }
-
-    WeatherClientResponseBody getAPIResponse() {
-        return weatherClient.getWeather().block();
     }
 }

@@ -4,17 +4,14 @@ import dev.ajkipp.weather.configuration.IntegrationWeatherConfiguration;
 import dev.ajkipp.weather.model.WeatherClientResponseBody;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static util.TestUtils.readJsonData;

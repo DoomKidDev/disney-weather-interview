@@ -6,5 +6,5 @@ import lombok.Data;
 public class Period {
     private String name;
     private String shortForecast;
-    private int temperature;
+    private Integer temperature;
 }

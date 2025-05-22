@@ -10,7 +10,7 @@ public class Daily {
     @JsonProperty("day_name")
     private String dayName;
     @JsonProperty("temp_high_celsius")
-    private double tempHighCelsius;
+    private Double tempHighCelsius;
     @JsonProperty("forecast_blurp")
     private String forecastBlurp;
 }

@@ -1,12 +1,12 @@
 package dev.ajkipp.weather.service;
 
+import dev.ajkipp.weather.client.WeatherClient;
 import dev.ajkipp.weather.model.Daily;
 import dev.ajkipp.weather.model.Period;
 import dev.ajkipp.weather.model.WeatherClientResponseBody;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -15,12 +15,11 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class WeatherService {
-    public static final String URL = "https://api.weather.gov/gridpoints/MLB/33,70/forecast";
-    private final RestTemplate restTemplate;
+
+    private final WeatherClient weatherClient;
 
     public List<Daily> getForecast() {
         WeatherClientResponseBody response = getAPIResponse();
-        log.info("Response from URL {} is {}", URL, response.toString());
         List<Period> periods = response.getProperties().getPeriods();
         Daily forecast = Daily.builder()
                 .dayName(LocalDate.now().getDayOfWeek().name())
@@ -50,6 +49,6 @@ public class WeatherService {
     }
 
     WeatherClientResponseBody getAPIResponse() {
-        return restTemplate.getForObject(URL, WeatherClientResponseBody.class);
+        return weatherClient.getWeather().block();
     }
 }

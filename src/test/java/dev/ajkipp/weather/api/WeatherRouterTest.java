@@ -1,6 +1,7 @@
 package dev.ajkipp.weather.api;
 
 import dev.ajkipp.weather.model.Daily;
+import dev.ajkipp.weather.model.GetForecastResponseBody;
 import dev.ajkipp.weather.service.WeatherService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -11,8 +12,10 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class WeatherControllerTest {
+class WeatherRouterTest {
 
     @Autowired
     private WebTestClient webTestClient;
@@ -21,7 +24,7 @@ class WeatherControllerTest {
     private WeatherService weatherService;
 
     @Test
-    void getForecast() throws Exception {
+    void getForecast() {
         List<Daily> dailies = List.of(Daily.builder()
                 .dayName("Monday")
                 .tempHighCelsius(27.2)
@@ -31,14 +34,19 @@ class WeatherControllerTest {
         Mockito.when(weatherService.getForecast())
                 .thenReturn(dailies);
 
-        this.webTestClient.get()
+        webTestClient
+                .get()
                 .uri("/forecast")
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody()
-                .jsonPath("$.daily[0].day_name").isEqualTo("Monday")
-                .jsonPath("$.daily[0].temp_high_celsius").isEqualTo(27.2)
-                .jsonPath("$.daily[0].forecast_blurp").isEqualTo("Sunny");
+                .expectBody(GetForecastResponseBody.class).value(body ->
+                        assertAll(
+                                () -> assertEquals(1, body.getDaily().size()),
+                                () -> body.getDaily().forEach(daily ->
+                                        assertAll(
+                                                () -> assertEquals("Monday", daily.getDayName()),
+                                                () -> assertEquals(27.2, daily.getTempHighCelsius()),
+                                                () -> assertEquals("Sunny", daily.getForecastBlurp())))));
     }
 }
